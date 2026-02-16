@@ -1,0 +1,9 @@
+# SQLite databases
+*.db
+*.db-journal
+*.db-wal
+
+# Build artifacts
+build/
+bin/
+*.o
