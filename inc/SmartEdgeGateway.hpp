@@ -22,6 +22,7 @@ class SmartEdgeGateway {
         std::string serialize_sensorData(const SensorData& data);
         void create_data_and_write_to_ringbuffer();
         std::optional<std::string> read_and_serialize_data();
+        void sync_offline_data_from_db();
 
     public:
         SmartEdgeGateway(std::string serverURI, std::string topic);

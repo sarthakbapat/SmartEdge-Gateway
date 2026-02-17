@@ -40,3 +40,31 @@ void DataBaseManager::storeToDb(const std::string& jsonPayload) {
     }
 
 }
+
+std::vector<OfflineMessage> DataBaseManager::fetchAllFromDb() {
+    std::vector<OfflineMessage> messages;
+    const char* sql = "SELECT id, payload FROM smartedge_data_buffer ORDER BY id ASC;";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            int id = sqlite3_column_int(stmt, 0);
+            const unsigned char* jsonText = sqlite3_column_text(stmt, 1);
+            
+            // Convert const unsigned char* to const char* using reinterpret_cast. Then wrap into std::string object.
+            messages.push_back({id, std::string(reinterpret_cast<const char*>(jsonText))});
+        }
+    }
+    sqlite3_finalize(stmt);
+    return messages;
+}
+
+void DataBaseManager::deleteById(int id) {
+    const char* sql = "DELETE FROM smartedge_data_buffer WHERE id = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_int(stmt, 1, id);
+        sqlite3_step(stmt);
+    }
+    sqlite3_finalize(stmt);
+}

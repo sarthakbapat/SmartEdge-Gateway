@@ -5,6 +5,11 @@
 #include <sqlite3.h>
 #include <string>
 
+struct OfflineMessage {
+    int id;
+    std::string json;
+};
+
 class DataBaseManager {
     private:
         sqlite3* db;
@@ -16,7 +21,9 @@ class DataBaseManager {
 
         void storeToDb(const std::string& jsonPayload);
 
-    //    void fetchFromDb();
+        std::vector<OfflineMessage> fetchAllFromDb();
+
+        void deleteById(int id);
 };
 
 #endif

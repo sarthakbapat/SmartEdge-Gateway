@@ -7,7 +7,7 @@ int main () {
 
     std::thread gateway_thread(&SmartEdgeGateway::run, &gateway);
 
-    std::this_thread::sleep_for(std::chrono::seconds(45));
+    std::this_thread::sleep_for(std::chrono::seconds(120));
 
     gateway.stop(); // Signals all internal loops to stop
 

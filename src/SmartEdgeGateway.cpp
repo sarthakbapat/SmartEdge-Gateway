@@ -64,10 +64,32 @@ std::optional<std::string> SmartEdgeGateway::read_and_serialize_data() {
     
 }
 
+void SmartEdgeGateway::sync_offline_data_from_db() {
+    std::cout << "Starting background sync of offline data..." << std::endl;
+    
+    auto messages = dbManager->fetchAllFromDb();
+    
+    // Access the vector elements and publish the data to MQTT.
+    for (const auto& msg : messages) {
+        // Double check connection before each publish.
+        if (mqttHandler->get_is_connected()) {
+                mqttHandler->publish_data(msg.json);
+                // Now remove the published data so we don't send it again in later syncs. 
+                dbManager->deleteById(msg.id);
+            }
+         else {
+            std::cout << "Connection lost during sync. Stopping." << std::endl;
+            break; 
+        }
+    }
+    std::cout << "Sync complete. Database is clear." << std::endl;
+}
+
 
 void SmartEdgeGateway::run() {
     is_running = true;
     std::optional<std::string> payload_data;
+    bool was_connected = false;
 
     // Connect to the MQTT server.
     if (mqttHandler->client_connect()) {
@@ -86,6 +108,18 @@ void SmartEdgeGateway::run() {
         // Read tempSensor data from ringbuffer and convert to json string. -> this thread
         // Publish the readings to MQTT server. -> this Thread
         // Handle the storage to db in case of network failure. -> this Thread
+
+        // Check if mqtt connection is active and was_connected flag is true.
+        bool currently_connected = mqttHandler->get_is_connected();
+        // This gets executed on reconnect of mqtt connection.
+        if (currently_connected && was_connected) {
+            // Reconnected after mqtt connection break.
+            // Start a thread to upload the data from db to mqtt. 
+            std::thread sync_thread(&SmartEdgeGateway::sync_offline_data_from_db, this);
+            // Detach this thread so that it runs in background.
+            sync_thread.detach();
+        }
+        was_connected = currently_connected;
 
         // Check the MQTT connection status and decide whether to publish to cloud or store to database.
         // Read the ringBuffer data.
