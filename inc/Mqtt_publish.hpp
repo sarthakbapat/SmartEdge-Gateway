@@ -22,6 +22,7 @@ class MQTTPublisher: public virtual mqtt::callback {
         int QoS;
         std::unique_ptr<mqtt::async_client> client;
         std::atomic<bool> is_connected;
+        std::atomic<int> connection_count;
 
     public:
         MQTTPublisher(std::string serverURI, std::string clientID, std::string topic, int QoS);
@@ -41,6 +42,10 @@ class MQTTPublisher: public virtual mqtt::callback {
         void connected(const std::string& cause) override;
 
         bool get_is_connected() const;
+
+        int get_connection_count() const;
+
+        void decrement_connection_count();
 
 };
 

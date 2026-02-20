@@ -88,7 +88,6 @@ void SmartEdgeGateway::sync_offline_data_from_db() {
 void SmartEdgeGateway::run() {
     is_running = true;
     std::optional<std::string> payload_data;
-    bool was_connected = false;
 
     // Connect to the MQTT server.
     if (mqttHandler->client_connect()) {
@@ -111,14 +110,15 @@ void SmartEdgeGateway::run() {
         // Check if mqtt connection is active and was_connected flag is true.
         bool currently_connected = mqttHandler->get_is_connected();
         // This gets executed on reconnect of mqtt connection.
-        if (currently_connected && was_connected) {
+        if (currently_connected && (mqttHandler->get_connection_count() > 1)) {
             // Reconnected after mqtt connection break.
             // Start a thread to upload the data from db to mqtt. 
             std::thread sync_thread(&SmartEdgeGateway::sync_offline_data_from_db, this);
             // Detach this thread so that it runs in background.
             sync_thread.detach();
+            // Decrement MQTT connection count so that this update is triggered only when there is a MQTT reconnect.
+            mqttHandler->decrement_connection_count();
         }
-        was_connected = currently_connected;
 
         // Check the MQTT connection status and decide whether to publish to cloud or store to database.
         // Read the ringBuffer data.

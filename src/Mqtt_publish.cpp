@@ -10,6 +10,7 @@ MQTTPublisher::MQTTPublisher(std::string serverURI, std::string clientID, std::s
 
     // Set the connection related flags to false, callbacks should set them to true.
     is_connected = false;
+    connection_count = 0;
 }
 
 MQTTPublisher::~MQTTPublisher() {
@@ -69,6 +70,14 @@ bool MQTTPublisher::get_is_connected() const {
     return is_connected;
 }
 
+int MQTTPublisher::get_connection_count() const {
+    return connection_count;
+}
+
+void MQTTPublisher::decrement_connection_count() {
+    connection_count--;
+}
+
 // connection_lost callback function, just setting connection_lost to true.
 void MQTTPublisher::connection_lost(const std::string& cause) {
     is_connected = false;
@@ -78,5 +87,6 @@ void MQTTPublisher::connection_lost(const std::string& cause) {
 // connected callback function, just setting is_connected to true.
 void MQTTPublisher::connected(const std::string& cause) {
     is_connected = true;
+    connection_count++;
     spdlog::info("MQTT: Connected.");
 }
