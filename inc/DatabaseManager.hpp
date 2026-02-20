@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
+#include "spdlog/spdlog.h"
 
 struct OfflineMessage {
     int id;

@@ -3,11 +3,15 @@
 
 int main () {
 
+    spdlog::set_level(static_cast<spdlog::level::level_enum>(SPDLOG_ACTIVE_LEVEL));
+
+    spdlog::info("Welcome to SmartEdgeGateway!");
+
     SmartEdgeGateway gateway("tcp://localhost:1883", "iot/tempData");
 
     std::thread gateway_thread(&SmartEdgeGateway::run, &gateway);
 
-    std::this_thread::sleep_for(std::chrono::seconds(120));
+    std::this_thread::sleep_for(std::chrono::seconds(30));
 
     gateway.stop(); // Signals all internal loops to stop
 

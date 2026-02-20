@@ -10,6 +10,7 @@
 #include <thread>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include "spdlog/spdlog.h"
 #include "mqtt/async_client.h"
 #include "Sensor.hpp"
 
@@ -24,6 +25,8 @@ class MQTTPublisher: public virtual mqtt::callback {
 
     public:
         MQTTPublisher(std::string serverURI, std::string clientID, std::string topic, int QoS);
+
+        ~MQTTPublisher();
 
         bool client_connect();
 

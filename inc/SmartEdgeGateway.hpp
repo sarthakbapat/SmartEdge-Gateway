@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <optional>
+#include "spdlog/spdlog.h"
 #include "RingBuffer.hpp"
 #include "Sensor.hpp"
 #include "Mqtt_publish.hpp"

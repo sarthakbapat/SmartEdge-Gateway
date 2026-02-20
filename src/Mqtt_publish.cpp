@@ -12,9 +12,13 @@ MQTTPublisher::MQTTPublisher(std::string serverURI, std::string clientID, std::s
     is_connected = false;
 }
 
+MQTTPublisher::~MQTTPublisher() {
+    cient_disconnect();
+}
+
 bool MQTTPublisher::client_connect() {
     bool success = false;
-    std::cout << "Initializing client for the server '" << serverURI << "'..." << std::endl;
+    spdlog::info("MQTT: Initializing client for the server {} ...", serverURI);
 
     try {
         auto connOpts = mqtt::connect_options_builder()
@@ -24,42 +28,39 @@ bool MQTTPublisher::client_connect() {
                             .clean_session(false)           // Keeps session when connection lost.
                             .finalize();
 
-        std::cout << "\nConnecting..." << std::endl;
+        spdlog::info("MQTT: Connecting ...");
         mqtt::token_ptr conntok = client->connect(connOpts);
-        std::cout << "Waiting for the connection..." << std::endl;
         conntok->wait();
-        std::cout << "  ...OK" << std::endl;
         success = true;
+        spdlog::info("MQTT: Connected OK");
     }
     catch(const mqtt::exception& exc) {
-        std::cout << "Client failed to connect: " << exc.what() << std::endl;
+        spdlog::error("MQTT: Client failed to connect: {}", exc.what());
     }
     return success;
 }
 
 void MQTTPublisher::publish_data(const std::string& jsonPayload) {
     try {
-        std::cout << "\nSending message..." << std::endl;
         mqtt::message_ptr pubmsg = mqtt::make_message(topic, jsonPayload);
         pubmsg->set_qos(QoS);
         client->publish(pubmsg)->wait_for(5);
-        std::cout << " ... OK" << std::endl;
+        spdlog::info("MQTT: Message published successfully.");
     }
     catch (const mqtt::exception& exc) {
-        std::cout << "MQTT error while sending message: " << exc.what() << std::endl;
+        spdlog::error("MQTT: Error while sending message: {}", exc.what());
     }
 }
 
 bool MQTTPublisher::cient_disconnect() {
     bool success = false;
     try {
-        std::cout << "\nDisconnecting..." << std::endl;
         client->disconnect()->wait();
-        std::cout << "  ...OK" << std::endl;
         success = true;
+        spdlog::info("MQTT: Client disconnected.");
     }
     catch (const mqtt::exception& exc) {
-        std::cout << "Client failed to disconnect: " << exc.what() << std::endl;
+        spdlog::error("MQTT: Client failed to disconnect: {}", exc.what());
     }
     return success;
 }
@@ -71,11 +72,11 @@ bool MQTTPublisher::get_is_connected() const {
 // connection_lost callback function, just setting connection_lost to true.
 void MQTTPublisher::connection_lost(const std::string& cause) {
     is_connected = false;
-    std::cout << "Connection Lost: " << cause << std::endl;
+    spdlog::info("MQTT: Connection lost: {}", cause);
 }
 
 // connected callback function, just setting is_connected to true.
 void MQTTPublisher::connected(const std::string& cause) {
     is_connected = true;
-    std::cout << "MQTT connected: " << cause << std::endl;
+    spdlog::info("MQTT: Connected.");
 }

@@ -6,8 +6,21 @@ SET (CMAKE_CXX_COMPILER "/usr/bin/clang++")
 SET (CMAKE_CXX_STANDARD 17)
 SET (CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Create a CMake cache variable to manage the log level
+set(LOG_LEVEL "INFO" CACHE STRING "Set the spdlog level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL, OFF)")
+
+# Map the string to the spdlog numeric macros
+if(LOG_LEVEL STREQUAL "TRACE")
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+elseif(LOG_LEVEL STREQUAL "DEBUG")
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+else()
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
+endif()
+
 # PahoMqttCpp is built and installed locally. find_package should be able to find it.
 find_package(PahoMqttCpp REQUIRED)
+find_package(spdlog REQUIRED)
 
 set(SRC
     src/Sensor.cpp
@@ -28,4 +41,5 @@ target_link_libraries(smartedge_gateway
     PRIVATE 
     PahoMqttCpp::paho-mqttpp3
     sqlite3
+    spdlog::spdlog
 )

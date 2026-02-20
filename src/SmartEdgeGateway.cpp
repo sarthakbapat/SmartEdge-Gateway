@@ -37,12 +37,11 @@ void SmartEdgeGateway::create_data_and_write_to_ringbuffer() {
     SensorData tempData;
     while(is_running) {
         tempData = tempSensor->read();
-        std::cout << "SmartEdgeGateway: Temp data read." << std::endl;
         if (ringBuffer->writeToBuffer(tempData)) {
-            std::cout << "SmartEdgeGateway: Data written to ringbuffer." << std::endl;
+            SPDLOG_DEBUG("SmartEdgeGateway: Data written to ringbuffer.");
         }
         else {
-            std::cout << "SmartEdgeGateway: Failed to write data to ringbuffer." << std::endl;
+            spdlog::warn("SmartEdgeGateway: Failed to write data to ringbuffer.");
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         std::memset(&tempData, 0, sizeof(SensorData));
@@ -53,19 +52,19 @@ std::optional<std::string> SmartEdgeGateway::read_and_serialize_data() {
     SensorData data;
     std::string payload;
     if (ringBuffer->readFromBuffer(data)) {
-        std::cout << "SmartEdgeGateway: Data read from ringbuffer." << std::endl;
+        SPDLOG_DEBUG("SmartEdgeGateway: Data read from ringbuffer.");
         payload = serialize_sensorData(data);
         return payload;
     }
     else {
-        std::cout << "SmartEdgeGateway: Failed to read data from ringbuffer." << std::endl;
+        spdlog::warn("SmartEdgeGateway: Failed to read data from ringbuffer.");
         return std::nullopt;
     }
     
 }
 
 void SmartEdgeGateway::sync_offline_data_from_db() {
-    std::cout << "Starting background sync of offline data..." << std::endl;
+    spdlog::info("Starting background sync of offline data...");
     
     auto messages = dbManager->fetchAllFromDb();
     
@@ -78,11 +77,11 @@ void SmartEdgeGateway::sync_offline_data_from_db() {
                 dbManager->deleteById(msg.id);
             }
          else {
-            std::cout << "Connection lost during sync. Stopping." << std::endl;
+            spdlog::info("Connection lost during sync. Stopping.");
             break; 
         }
     }
-    std::cout << "Sync complete. Database is clear." << std::endl;
+    spdlog::info("SmareEdgeGateway: Sync complete. Database is clear.");
 }
 
 
@@ -93,10 +92,10 @@ void SmartEdgeGateway::run() {
 
     // Connect to the MQTT server.
     if (mqttHandler->client_connect()) {
-        std::cout << "SmartEdgeGateway: Connected to the MQTT Server." << std::endl;
+        spdlog::info("SmartEdgeGateway: Connected to the MQTT Server.");
     }
     else {
-        std::cout << "SmartEdgeGateway: Failed to Connect to the MQTT Server...exiting..." << std::endl;
+        spdlog::error("SmartEdgeGateway: Failed to connect to the MQTT server. Exiting ...");
         return;
     }
 
@@ -127,21 +126,21 @@ void SmartEdgeGateway::run() {
 
         if (mqttHandler->get_is_connected()) {
             if (payload_data) {
-                std::cout << "SmartEdgeGateway: Json payload: " << *payload_data << std::endl;
+                SPDLOG_DEBUG("SmartEdgeGateway: Json payload: {}", *payload_data);
                 mqttHandler->publish_data(*payload_data);
             }
             else {
-                std::cout << "SmartEdgeGateway: Failed to get payload." << std::endl;
+                spdlog::warn("SmartEdgeGateway: Failed to get JSON payload.");
             }
         }
         else {
-            std::cout << "SmartEdgeGateway: MQTT connection lost, storing data to database." << std::endl;
+            spdlog::info("SmartEdgeGateway: MQTT connection lost, storing data to database.");
             // Store to database function.
             if (payload_data) {
                 dbManager->storeToDb(*payload_data);
             }
             else {
-                std::cout << "SmartEdgeGateway: Failed to get payload." << std::endl;
+                spdlog::warn("SmartEdgeGateway: Failed to get JSON payload while storing to database.");
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -155,7 +154,7 @@ void SmartEdgeGateway::run() {
 void SmartEdgeGateway::stop() {
     if (is_running) {
         is_running = false;
-        std::cout << "SmartEdgeGateway: Stopped." << std::endl;
+        spdlog::info("SmartEdgeGateway: Stopped.");
     }
 
 }

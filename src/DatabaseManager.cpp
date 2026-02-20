@@ -12,7 +12,7 @@ DataBaseManager::DataBaseManager(const std::string& dbPath) {
     int rc = sqlite3_prepare_v2(db, insertSql, -1, &insertStmt, nullptr);
     
     if (rc != SQLITE_OK) {
-        std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
+        spdlog::error("DatabaseManager: Failed to prepare insert statement: {}", sqlite3_errmsg(db));
         insertStmt = nullptr;
     }
 }
@@ -35,8 +35,8 @@ void DataBaseManager::storeToDb(const std::string& jsonPayload) {
     sqlite3_bind_text(insertStmt, 1, jsonPayload.c_str(), -1, SQLITE_TRANSIENT);
 
     if (sqlite3_step(insertStmt) != SQLITE_DONE) {
-        std::cerr << "Insert failed: " << sqlite3_errmsg(db) << std::endl;
-        std::cout << "Insert to database failed." << std::endl;
+        spdlog::error("DatabaseManager: Insert to database failed: {}", sqlite3_errmsg(db));
+        
     }
 
 }
