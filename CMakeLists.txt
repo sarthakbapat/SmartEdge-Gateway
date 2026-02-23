@@ -21,6 +21,7 @@ endif()
 # PahoMqttCpp is built and installed locally. find_package should be able to find it.
 find_package(PahoMqttCpp REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 set(SRC
     src/Sensor.cpp
@@ -29,9 +30,16 @@ set(SRC
     src/SmartEdgeGateway.cpp
     src/main.cpp)
 
-# Need to do this else error - no LC_RPATH's found. libpaho-mqttpp3.1.dylib not loaded.
-set(CMAKE_INSTALL_RPATH "/usr/local/lib")
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+# Use APPLE variable to detect macOS, else the idea is to cross-compile for Yocto.
+if(APPLE)
+    message(STATUS "Configuring for macOS (Apple) - Setting RPATH")
+    # This ensures the executable finds the dylibs in /usr/local/lib on your Mac
+    set(CMAKE_INSTALL_RPATH "/usr/local/lib")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+else()
+    message(STATUS "Configuring for Linux/Embedded - Standard RPATH handling")
+    # Yocto/Bitbake will handle RPATH and library linking via the toolchain file
+endif()
 
 add_executable(smartedge_gateway ${SRC})
 
@@ -40,6 +48,6 @@ target_include_directories(smartedge_gateway PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 target_link_libraries(smartedge_gateway 
     PRIVATE 
     PahoMqttCpp::paho-mqttpp3
-    sqlite3
+    SQLite::SQLite3
     spdlog::spdlog
 )
