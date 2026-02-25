@@ -1,3 +1,5 @@
+![Static Analysis](https://github.com/sarthakbapat/SmartEdge-Gateway/actions/workflows/static_analysis.yml/badge.svg)
+
 # Smart Edge Gateway (C++17, MQTT, SQLite3)
 
 A resilient, multi-threaded IoT Edge Gateway designed for industrial data acquisition. This project bridges the gap between local sensors and the cloud, ensuring high-availability and zero data loss through local persistence and automated synchronization.
