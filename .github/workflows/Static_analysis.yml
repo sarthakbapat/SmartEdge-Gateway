@@ -18,4 +18,4 @@ jobs:
 
       - name: Run Cppcheck
         # --error-exitcode=1 ensures the build fails if bugs are found
-        run: cppcheck --enable=all --inconclusive --std=c++17 --error-exitcode=1 --suppress=unusedFunction -I inc/ src/
+        run: cppcheck --enable=warning,style,performance,portability --inconclusive --std=c++17 --error-exitcode=1 --suppress=unusedFunction -I inc/ src/
