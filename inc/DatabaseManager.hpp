@@ -16,7 +16,7 @@ class DataBaseManager {
         sqlite3* db;
         sqlite3_stmt* insertStmt;
     public:
-        DataBaseManager(const std::string& dbPath);
+        explicit DataBaseManager(const std::string& dbPath);
 
         ~DataBaseManager();
 

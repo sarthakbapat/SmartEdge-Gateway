@@ -14,7 +14,7 @@ private:
 
 public:
     // Constructor
-    RingBuffer(size_t size): size(size), buffer_(size) {
+    explicit RingBuffer(size_t size): size(size), buffer_(size) {
         head_ = 0;
         tail_ = 0;
     }
@@ -62,10 +62,10 @@ public:
     }
 
 
-    size_t getBufferCurrentSize() const {
+/*     size_t getBufferCurrentSize() const {
         std::lock_guard<std::mutex> l_guard(l_mutex); 
         return (head_ + size - tail_) % size;
-    }
+    } */
 
 };
 

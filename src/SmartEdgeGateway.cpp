@@ -44,16 +44,14 @@ void SmartEdgeGateway::create_data_and_write_to_ringbuffer() {
             spdlog::warn("SmartEdgeGateway: Failed to write data to ringbuffer.");
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        std::memset(&tempData, 0, sizeof(SensorData));
     }
 }
 
 std::optional<std::string> SmartEdgeGateway::read_and_serialize_data() {
     SensorData data;
-    std::string payload;
     if (ringBuffer->readFromBuffer(data)) {
         SPDLOG_DEBUG("SmartEdgeGateway: Data read from ringbuffer.");
-        payload = serialize_sensorData(data);
+        std::string payload = serialize_sensorData(data);
         return payload;
     }
     else {

@@ -1,10 +1,12 @@
 #include "Mqtt_publish.hpp"
 
-MQTTPublisher::MQTTPublisher(std::string serverURI, std::string clientID, std::string topic, int QoS)
-    : serverURI(serverURI), clientID(clientID), topic(topic), QoS(QoS)
+MQTTPublisher::MQTTPublisher(std::string serverURI, std::string clientID, std::string topic, int QoS):
+    serverURI(serverURI), 
+    clientID(clientID), 
+    topic(topic), 
+    QoS(QoS),
+    client(std::make_unique<mqtt::async_client>(serverURI, clientID))
 {
-    client = std::make_unique<mqtt::async_client>(serverURI, clientID);
-
     // Set the callback here using *this (callback object).
     client->set_callback(*this);
 
