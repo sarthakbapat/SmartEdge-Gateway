@@ -1,4 +1,4 @@
-![Static Analysis](https://github.com/sarthakbapat/SmartEdge-Gateway/actions/workflows/static_analysis.yml/badge.svg)
+![Static Analysis](https://github.com/sarthakbapat/SmartEdge-Gateway/actions/workflows/Static_analysis.yml/badge.svg)
 
 # Smart Edge Gateway (C++17, MQTT, SQLite3)
 
